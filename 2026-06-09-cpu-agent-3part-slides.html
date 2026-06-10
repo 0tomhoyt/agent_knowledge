@@ -68,6 +68,7 @@
 <li>长循环权威数据：SWE-bench Verified 单实例上限 <strong>250 步 / 3 美元</strong> [来源: arXiv 2511.13646] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
 <li>SWE-bench Pro 每任务 <strong>50 次工具调用</strong>（&quot;相当标准&quot;）[来源: Scale AI, OpenReview 9R2iUHhVfr] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
 <li>每步不同计算形态：感知(CPU 密集)、推理(远程→CPU 空闲)、规划(轻逻辑)、工具(CPU/IO 混合)、记忆(向量检索)</li>
+<li><strong>一个真实 turn = 计算<img class="emoji" draggable="false" alt="↔" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2194.svg" data-marp-twemoji=""/>通信乒乓</strong>：<code>感知 → [call_llm ~570ms] → read_file(fork 6.5ms) → [call_llm] → run_tests(35-61%) → answer</code>（250 步上限 = 几十~上百次这样的 turn）</li>
 <li>新 workload 本质：<strong>混合 / 突发 / 长尾 / 依赖复杂</strong>——传统调度假设失效</li>
 </ul>
 <footer>2026-06 · 三部分重构版</footer>
@@ -121,6 +122,14 @@
 <li>工具执行占请求时间 <strong>35%-61%</strong>（编码 60%）[来源: PASTE, arXiv 2603.18897] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
 <li>fork 1GB 进程 <strong>6.5ms</strong>，50GB <strong>253.9ms</strong> [来源: On-demand-fork, EuroSys 2021, Purdue] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
 </ul>
+<p><strong>手搓最简 agent：整个循环就是几十行 Python</strong></p>
+<pre is="marp-pre" data-auto-scaling="downscale-only"><code class="language-python"><span class="hljs-keyword">for</span> step <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">250</span>):              <span class="hljs-comment"># SWE-bench 上限 250 步/$3 <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></span>
+    resp = call_llm(ctx)             <span class="hljs-comment"># ← 远程通信 ~570ms，等待期 CPU~0% <img class="emoji" draggable="false" alt="⚠" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/></span>
+    <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;answer&quot;</span> <span class="hljs-keyword">in</span> resp: <span class="hljs-keyword">break</span>
+    result = TOOLS[resp[<span class="hljs-string">&quot;action&quot;</span>][<span class="hljs-string">&quot;name&quot;</span>]](**resp[<span class="hljs-string">&quot;action&quot;</span>][<span class="hljs-string">&quot;args&quot;</span>])  <span class="hljs-comment"># ← 本地计算，占 35-61% <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></span>
+    ctx += [{<span class="hljs-string">&quot;role&quot;</span>:<span class="hljs-string">&quot;assistant&quot;</span>,<span class="hljs-string">&quot;content&quot;</span>:json.dumps(resp)}, {<span class="hljs-string">&quot;role&quot;</span>:<span class="hljs-string">&quot;user&quot;</span>,<span class="hljs-string">&quot;content&quot;</span>:result}]  <span class="hljs-comment"># 序列化税</span>
+<span class="hljs-comment"># 整个 agent = for 循环 + 远程调用 + 本地工具 + ctx 累积 = 计算<img class="emoji" draggable="false" alt="↔" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2194.svg" data-marp-twemoji=""/>通信乒乓</span>
+</code></pre>
 <footer>2026-06 · 三部分重构版</footer>
 </section>
 </foreignObject></svg><svg data-marpit-svg="" viewBox="0 0 1280 720"><foreignObject width="1280" height="720"><section id="6" data-paginate="true" data-header="CPU底层软件团队 · Agent时代研究方向" data-footer="2026-06 · 三部分重构版" data-theme="gaia" lang="C" data-marpit-pagination="6" style="--paginate:true;--header:CPU底层软件团队 · Agent时代研究方向;--footer:2026-06 · 三部分重构版;--theme:gaia;" data-marpit-pagination-total="25" data-size="16:9">

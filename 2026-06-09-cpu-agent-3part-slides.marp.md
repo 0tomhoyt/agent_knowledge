@@ -54,6 +54,7 @@ author: 'CPU底层软件团队'
 - 长循环权威数据：SWE-bench Verified 单实例上限 **250 步 / 3 美元** [来源: arXiv 2511.13646] ✅
 - SWE-bench Pro 每任务 **50 次工具调用**（"相当标准"）[来源: Scale AI, OpenReview 9R2iUHhVfr] ✅
 - 每步不同计算形态：感知(CPU 密集)、推理(远程→CPU 空闲)、规划(轻逻辑)、工具(CPU/IO 混合)、记忆(向量检索)
+- **一个真实 turn = 计算↔通信乒乓**：`感知 → [call_llm ~570ms] → read_file(fork 6.5ms) → [call_llm] → run_tests(35-61%) → answer`（250 步上限 = 几十~上百次这样的 turn）
 - 新 workload 本质：**混合 / 突发 / 长尾 / 依赖复杂**——传统调度假设失效
 
 <!-- 把 agent 工作流画出来：五个字一个圈。两个特征决定它和普通推理服务不一样：一是长循环（SWE-bench 上限 250 步/$3，几十到上百次往返）；二是每步不同计算形态，导致混合/突发/长尾/依赖复杂的负载。传统面向单一计算的调度器处理不了。 -->
@@ -72,6 +73,17 @@ author: 'CPU底层软件团队'
 
 - 工具执行占请求时间 **35%-61%**（编码 60%）[来源: PASTE, arXiv 2603.18897] ✅
 - fork 1GB 进程 **6.5ms**，50GB **253.9ms** [来源: On-demand-fork, EuroSys 2021, Purdue] ✅
+
+**手搓最简 agent：整个循环就是几十行 Python**
+
+```python
+for step in range(250):              # SWE-bench 上限 250 步/$3 ✅
+    resp = call_llm(ctx)             # ← 远程通信 ~570ms，等待期 CPU~0% ⚠️
+    if "answer" in resp: break
+    result = TOOLS[resp["action"]["name"]](**resp["action"]["args"])  # ← 本地计算，占 35-61% ✅
+    ctx += [{"role":"assistant","content":json.dumps(resp)}, {"role":"user","content":result}]  # 序列化税
+# 整个 agent = for 循环 + 远程调用 + 本地工具 + ctx 累积 = 计算↔通信乒乓
+```
 
 <!-- 每步拆开：感知 CPU 密集（simdjson GB/s 级）；推理远程高延迟，等待期本地 CPU 接近 0%；规划轻逻辑；工具 CPU/IO 混合还可能 fork，fork 1GB 要 6.5ms、50GB 要 253ms；记忆更新向量检索 MiniLM 4.2ms/句、reranker 100 候选 500ms-5s。每步不同计算形态——异构负载根源。 -->
 
