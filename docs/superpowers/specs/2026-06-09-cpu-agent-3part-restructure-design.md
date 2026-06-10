@@ -193,6 +193,7 @@
 - **R1（最高）**：平台 SME 可用性未查实 → **P3 整体口径悬空**（不只 P3-4：P3-3 thesis、P3-4 SME kernel、P3-5 SME tile 转置、P3-6 "同一组单元=SME+SVE" punchline、P3-7 SME kernel 库都依赖 SME）。作者硬件答复为"SME/SVE 是已有或**正在跟进**的能力"，故 SME 可能尚未到位。**缓解**：列为实现第一步阻塞项。查实后分两种口径——
   - **若已有 SME**：按原设计（P3-4 = 已具备的算子机会）。
   - **若 SME 尚未到位**：P3 整体**pivot 为"SVE-first 融合 + SME 路线图"**——thesis 强调 SVE 向量/predicate/gather-scatter 已可融合 comm 数据通路，SME 矩阵引擎作为"即将解锁"的算子侧升级写在 roadmap（P3-7）与 P3-4 的"前瞻"口径里。P3-6 punchline 改述为"同一组向量单元、同一份布局"（去 SME 依赖）。
+- **R1 决议（实现期）**: 口径 = NEON-now + SVE/SME-roadmap（比 spec 原两分支更靠前：现役鲲鹏 920 连 SVE 都没有，仅 NEON）；依据 = 鲲鹏 920（TaiShan v110, ARMv8.2-A）经多源确认只具备 NEON（固定 128-bit SIMD），无 SVE/SVE2/SME（IEEE Micro 2021 官方芯片论文 + VLDB Journal 2022 + Stony Brook Ookami），且鲲鹏 930 从未正式发布、其 SVE2/SME 状态公开未确认；详见 `docs/superpowers/research/2026-06-09-platform-sme-sve.md`。
 - **R2**：SME 小批量 agent kernel 的公开实测数据可能稀缺（学术多关注训练大 batch GEMM）。**缓解**：若无权威实测，标注为数量级估算 + 团队可自测的 micro-benchmark 方案。
 - **R3**：A2A 协议（Google, 2025）较新，生态数据可能不稳。**缓解**：作为"趋势信号"而非精确基准引用。
 - **R4**：均衡 21 页可能仍偏紧（P3 有 7 页但要承载武器+三件事+两侧+punchline+roadmap）。**缓解**：P3-2/P3-7 可压成"封面信息密度高"的页；必要时启用附录承接细节。
