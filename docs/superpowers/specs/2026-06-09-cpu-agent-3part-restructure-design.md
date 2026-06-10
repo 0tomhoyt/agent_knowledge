@@ -22,13 +22,13 @@
 
 并在三个关键约束下重构：
 
-- **硬件**：团队主力平台为 **华为鲲鹏 920（TaiShan v110, ARMv8.2-A；现役仅 NEON 128-bit，无 SVE/SVE2/SME）**；SVE/SVE2/SME 为**前瞻/路线图**（鲲鹏 930+/950+ 解锁，公开未确认）。**R1 已决议口径 = NEON-now + SVE/SME-roadmap**（见 §11、`docs/superpowers/research/2026-06-09-platform-sme-sve.md`）。第三部分因此是"在现役 NEON 上今天就能做的融合 + SVE/SME 前瞻解锁"。
+- **硬件**：团队主力平台为 **华为鲲鹏 920（TaiShan v110, ARMv8.2-A；现役仅 NEON 128-bit，无 SVE/SVE2/SME）**（✅ 多源确认：IEEE Micro 2021 + VLDB Journal 2022 + Stony Brook Ookami）；同时团队已通过 early-access 取得**新一代鲲鹏（内部可得，⚠️ 暂无公开来源）= full SVE + SVE2 + SME**。**R1 决议口径（2026-06-10 再决议）= 鲲鹏 920 NEON-only（✅）+ 新一代鲲鹏 SVE/SVE2/SME（⚠️ early-access 已可得）**（见 §11、`docs/superpowers/research/2026-06-09-platform-sme-sve.md`）。第三部分因此是"NEON（鲲鹏 920 现役）+ SVE/SVE2/SME（新一代鲲鹏 early-access）从今天起即可在自有 SVE/SME 硅上实测，无需再等未来平台"。
 - **P2 定位**："洞察报告" = **两者结合**——先快速盘点业界/学术现状（建立共同认知），再落到团队提炼的关键洞察与瓶颈，桥到第三部分。
 - **时间**：**均衡分配**，约 P1 8min / P2 10min / P3 9min + 开场 1min + 总结 2min = 30min。
 
 ### 1.2 统一主线（全场一句话 spine）
 
-> **Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。** 从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台——**现役 NEON 已能融合，SVE/SVE2/SME（鲲鹏 930+/950+ 解锁）是同一融合方向的下一站**——它不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合**，就是我们在 Agent 时代的主场。
+> **Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。** 从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台——**NEON（鲲鹏 920 现役）+ SVE/SVE2/SME（新一代鲲鹏 early-access 现已可得）是同一融合方向——武器已齐备，团队可从今天起在自有 SVE/SME 硅上实测验证，无需再等未来平台**——它不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合**，就是我们在 Agent 时代的主场。
 
 三部分构成 **problem setup → diagnosis → prescription** 的诊断弧：
 
@@ -36,7 +36,7 @@
 |------|----------------|
 | **P1 基础** | **problem setup** — 让听众从第 1 页就看到 agent loop 本质是 compute↔comm 交织（非"什么是大模型"那种浅基础） |
 | **P2 洞察** | **diagnosis** — 现状盘点 + 数据论证："单→多 Agent，通信占比上升、渐成主导" |
-| **P3 融合** | **prescription** — 在 ARM 平台（NEON 现役 + SVE/SME 前瞻）把 comm 与 compute 融合 = 主场机会 |
+| **P3 融合** | **prescription** — 在 ARM 平台（NEON 现役·鲲鹏 920 + SVE/SVE2/SME early-access·新一代鲲鹏）把 comm 与 compute 融合 = 主场机会 |
 
 主线把作者最初对 P3 的措辞"潜在机会"升级为"有论证的主张"——机会不是清单，而是诊断弧的自然结论。
 
@@ -101,24 +101,24 @@
 
 ## 5. Part 3 融合 —— ARM SME/SVE 通信计算融合（7 页, 9min, prescription）
 
-**角色**：主线的 **prescription**。承接 P2-7 抛出的问题，给出主场答案：**ARM 平台的 SIMD/向量/矩阵扩展（现役 NEON + 前瞻 SVE/SME）是"通信计算融合"的物理基础**（R1 已决议口径 = NEON-now + SVE/SME-roadmap）。叙事弧：**武器（NEON/SVE/SME 是什么）→ 融合论点（三件事）→ 算子侧 → 通信侧 → 融合 punchline → 路线图**。
+**角色**：主线的 **prescription**。承接 P2-7 抛出的问题，给出主场答案：**ARM 平台的 SIMD/向量/矩阵扩展（NEON 现役·鲲鹏 920 + SVE/SVE2/SME early-access·新一代鲲鹏，武器已齐备）是"通信计算融合"的物理基础**（R1 决议口径 = 鲲鹏 920 NEON-only ✅ + 新一代鲲鹏 SVE/SVE2/SME ⚠️ early-access 已可得）。叙事弧：**武器（NEON/SVE/SME 是什么）→ 融合论点（三件事）→ 算子侧 → 通信侧 → 融合 punchline → 路线图**。
 
-> **⚠️ P3 各页口径**：现役平台鲲鹏 920 仅 NEON，SVE/SME 为路线图。下表 P3-2~P3-7 措辞仍保留旧"SME/SVE"字样，**实现时以 `docs/superpowers/research/2026-06-09-platform-sme-sve.md` §4 传导表为准**调整为 NEON-now 口径（NEON=现役，SVE/SME=前瞻/路线图）。
+> **⚠️ P3 各页口径**：鲲鹏 920（现役部署）= ARMv8.2-A，NEON-only，无 SVE/SVE2/SME（✅ 多源确认）；SVE/SVE2/SME 在**新一代鲲鹏（团队 early-access，⚠️ 暂无公开来源）**上现已可得。下表 P3-2~P3-7 措辞仍保留旧"SME/SVE"字样，**实现时以 `docs/superpowers/research/2026-06-09-platform-sme-sve.md` §4 传导表为准**调整为"NEON=鲲鹏 920 现役，SVE/SME=新一代鲲鹏 early-access 已可得（⚠️ 暂无公开来源）"口径。他平台 SVE/SME 数字（A64FX/Graviton/LX2/Apple M4 等）需在本团队 SVE/SME 硅上 re-measure 后引用。
 
 | 页 | 标题 | 要点 | 主线触点 | 来源 |
 |----|------|------|----------|------|
-| P3-1 | 章节封面 + 主场一句话 | 承接 P2-7，一句话："在我们 ARM 平台上，NEON（现役）+ SVE/SME（前瞻）是通信计算融合的物理基础。" | handoff 落地 | 新写 |
-| P3-2 | NEON/SVE/SME 是什么、为什么对 agent 特别 | **NEON（现役·固定 128-bit SIMD）+ SVE（前瞻·predicate+gather/scatter+向量长度可扩展）+ SME（前瞻·2D tile+outer-product 矩阵引擎）**；论点：predicate+gather/scatter+矩阵引擎 匹配 agent 的"变长/不规则/小批量"，vs x86 AVX-512 固定宽度；NEON 今天就能做基础融合 | 武器亮相 | ✅ 已研究（见研究文档 §3） |
+| P3-1 | 章节封面 + 主场一句话 | 承接 P2-7，一句话："在我们 ARM 平台上，NEON（鲲鹏 920 现役）+ SVE/SVE2/SME（新一代鲲鹏 early-access 已可得）是通信计算融合的物理基础。" | handoff 落地 | 新写 |
+| P3-2 | NEON/SVE/SME 是什么、为什么对 agent 特别 | **NEON（鲲鹏 920 现役·固定 128-bit SIMD）+ SVE（新一代鲲鹏 early-access·predicate+gather/scatter+向量长度可扩展）+ SME（新一代鲲鹏 early-access·2D tile+outer-product 矩阵引擎）**；论点：predicate+gather/scatter+矩阵引擎 匹配 agent 的"变长/不规则/小批量"，vs x86 AVX-512 固定宽度；NEON 今天就能做基础融合，SVE/SME 在新一代鲲鹏上已可实测（⚠️ 暂无公开来源） | 武器亮相 | ✅ 已研究（见研究文档 §3） |
 | **P3-3** | **通信计算融合 = 三件事**（核心 thesis 页） | ①**重叠**：comm 期间做计算（延迟隐藏）②**数据搬运即计算**：SME/SVE 加速序列化/pack/转置/gather——comm 的数据搬运本身就是向量化/矩阵化工作 ③**kernel+原语协同**：comm 原语与算子共享 SME/SVE 单元+内存布局，消除边界拷贝 | **🎯 thesis 展开** | 综合 |
 | P3-4 | 算子侧：小批量 agent kernel on SME | agent 的 embedding/rerank/小批量 GEMM/attention 是"瘦高"矩阵，SME outer-product+tile 适合；vs 训练推理大 batch GEMM。映射团队 **GEMM/Attention** 能力 | compute 侧机会 | **🆕 需研究**（SME 小批量 GEMM 数据） |
 | P3-5 | 通信侧：SVE 加速 comm 数据通路 | SVE 版 simdjson 式 JSON/序列化（承袭 simdjson 数据，落到 SVE/NEON）；共享内存零拷贝+SVE gather/scatter 搬运不规则消息；pack/transpose 用 SME tile。映射团队 **MPI/UCX/SDMA** 能力 | comm 侧机会 | 承袭 + **🆕 SVE 落地** |
 | **P3-6** | **融合点：同一组单元、同一份布局**（punchline） | 合成 P3-4+P3-5：comm 的"数据搬运"与 compute 的"向量化/矩阵化"在 SME/SVE 上是**同一类操作、共享单元和布局**，所以能融合。对比图：传统（边界有拷贝/序列化开销）vs 融合（无边界） | **🎯 prescription climax，主线第三次/落地** | 综合 |
-| P3-7 | 怎么开始：三层机会 + 路线图 | 短期（SVE 序列化/JSON 算子、零拷贝 IPC 原型）→ 中期（SME 小批量 agent kernel 库、comm 原语标准化）→ 长期（Agent workload benchmark + CPU-Agent 协同设计反哺架构） | 可执行收口 | 承袭 roadmap |
+| P3-7 | 怎么开始：三层机会 + 路线图 | **短期（现在–6 月）**：NEON（鲲鹏 920 现役部署）立即可做 + SVE/SME（新一代鲲鹏 early-access）实测启动（simdjson 解析、iceoryx2 零拷贝、小-GEMM kernel、SVE gather/scatter 序列化、SME outer-product micro-bench）→ **中期（6–18 月）**：SVE/SME 生产化/库化 + Agent-native 通信原语 → **长期（18–36 月）**：Agent Workload Benchmark + 反哺 ARM。⚠️ 新一代鲲鹏暂无公开可引用来源 | 可执行收口 | 承袭 roadmap（已去"等 930+/950+ 解锁"门） |
 
 **承袭与新研究**：
-- **承袭**：P3-5（simdjson 数据）、P3-7（三层时间线、Agent-native 算子/原语/benchmark 前瞻）来自现有已验证内容，现在 ARM 落地。
+- **承袭**：P3-5（simdjson 数据）、P3-7（三层时间线、Agent-native 算子/原语/benchmark，现已去"等 930+/950+ 解锁"门）来自现有已验证内容，现在 ARM 落地。
 - **🆕 新研究（P3 是研究重灾区，必须并行 + 对抗式校验）**：
-  - **P3-2**：SME/SVE 规格细节 + **关键问题：我们平台型号到底有没有 SME**（倚天/鲲鹏/Graviton 的 SVE 宽度、SME 可用性差异大——若暂无 SME，P3-4 口径从"已具备"调整为"路线图/即将具备"，**必须先查实再定口径**）。
+  - **P3-2**：SME/SVE 规格细节（已在**新一代鲲鹏 early-access** 上可得 full SVE/SVE2/SME，⚠️ 暂无公开来源；鲲鹏 920 现役仍为 NEON-only ✅）。**关键问题已解决**：团队不再等待未来平台——SVE/SME 在新一代鲲鹏（early-access）上现可实测；他平台（A64FX/Graviton/LX2/Apple M4）SVE 宽度/SME 数据仍需在本团队 SVE/SME 硅上 re-measure 后引用。
   - **P3-3**：通信计算融合 / overlap 在 ARM 上的学术+工业先例。
   - **P3-4**：SME 小批量 GEMM/embedding 实测或论文数据（区别于训练大 batch）。
   - **P3-5**：SVE 版本序列化/JSON、gather/scatter 用于消息搬运的数据。
@@ -146,7 +146,7 @@
 | 单 Agent·工具调用启动开销（Python/fork/JVM 冷启动） | **附录或删** | ⚠️ **off-thesis**（讲延迟不讲融合），主体砍，可留 1 个例子在 P3-5 |
 | 单 Agent·调度 | 删 / P1-5 一句带过 | off-thesis |
 | 多 Agent 协同·通信模式/同步/负载（8p） | **P2-4~5** | 搬家 |
-| 前瞻·Agent-native 算子/原语/benchmark/协同设计 | **P3-3、P3-7** | 搬家 + 融合 thesis 重组 |
+| Agent-native 算子/原语/benchmark/协同设计（原"前瞻"块） | **P3-3、P3-7** | 搬家 + 融合 thesis 重组 |
 | 附录·延迟/加速比速查表 | **新附录** | 承袭 |
 | 🔍 数据校验报告（10 声明） | **扩展** | 承袭 8 个数量级估算 + 新增 P2/P3 新研究校验 |
 | SWE-bench/SWE-agent/API间隙CPU~0% | **P1** | 承袭 |
@@ -182,7 +182,7 @@
 
 ## 10. 实现阶段方法（指引 writing-plans）
 
-1. **先查实关键口径（阻塞项）**：P3-2 的"我们平台是否有 SME、SVE 宽度多少"必须最先确认，因为它决定 P3-4 是"已具备"还是"路线图"。其余 P2-2、P3-3/4/5 研究可并行。
+1. **先查实关键口径（阻塞项）**：~~P3-2 的"我们平台是否有 SME、SVE 宽度多少"必须最先确认~~ **（2026-06-10 再决议后已解阻：新一代鲲鹏 early-access 已可得 full SVE/SVE2/SME，⚠️ 暂无公开来源；鲲鹏 920 现役 NEON-only ✅）。** 现可立即推进 P3 全部页面；剩余研究重点是 SVE/SME 在本团队硅上的 re-measure（他平台数字不得直接引用）。其余 P2-2、P3-3/4/5 研究可并行。
 2. **多 agent 并行研究**：对 5 个新研究领域（P2-2 A2A 现状、P3-2 SME/SVE 规格+平台、P3-3 融合先例、P3-4 SME 小批量、P3-5 SVE 序列化）并行检索 + 取源。
 3. **承袭内容先落位**：P1、P2-4/5、P3-5/7 的大量已验证内容先从旧详细文档搬运 + 重新定位，再补新研究。
 4. **对抗式校验**：所有新声明过数据校验报告（确认✅/数量级⚠️），与旧 10 声明合并成扩展校验报告。
@@ -192,10 +192,11 @@
 
 ## 11. 关键风险与开放问题
 
-- **R1（最高）**：平台 SME 可用性未查实 → **P3 整体口径悬空**（不只 P3-4：P3-3 thesis、P3-4 SME kernel、P3-5 SME tile 转置、P3-6 "同一组单元=SME+SVE" punchline、P3-7 SME kernel 库都依赖 SME）。作者硬件答复为"SME/SVE 是已有或**正在跟进**的能力"，故 SME 可能尚未到位。**缓解**：列为实现第一步阻塞项。查实后分两种口径——
-  - **若已有 SME**：按原设计（P3-4 = 已具备的算子机会）。
-  - **若 SME 尚未到位**：P3 整体**pivot 为"SVE-first 融合 + SME 路线图"**——thesis 强调 SVE 向量/predicate/gather-scatter 已可融合 comm 数据通路，SME 矩阵引擎作为"即将解锁"的算子侧升级写在 roadmap（P3-7）与 P3-4 的"前瞻"口径里。P3-6 punchline 改述为"同一组向量单元、同一份布局"（去 SME 依赖）。
-- **R1 决议（实现期）**: 口径 = NEON-now + SVE/SME-roadmap（比 spec 原两分支更靠前：现役鲲鹏 920 连 SVE 都没有，仅 NEON）；依据 = 鲲鹏 920（TaiShan v110, ARMv8.2-A）经多源确认只具备 NEON（固定 128-bit SIMD），无 SVE/SVE2/SME（IEEE Micro 2021 官方芯片论文 + VLDB Journal 2022 + Stony Brook Ookami），且鲲鹏 930 从未正式发布、其 SVE2/SME 状态公开未确认；详见 `docs/superpowers/research/2026-06-09-platform-sme-sve.md`。
+- **R1（最高）**：~~平台 SME 可用性未查实 → P3 整体口径悬空~~ **（2026-06-10 再决议后关闭）**：团队已通过 early-access 取得新一代鲲鹏（内部可得），其上 full SVE/SVE2/SME 已可得（⚠️ 暂无公开可引用来源）。P3 不再"悬空"，可立即推进。
+- **R1 决议（2026-06-10 再决议）**: 口径 = **鲲鹏 920 NEON-only（✅）+ 新一代鲲鹏 full SVE+SVE2+SME（⚠️ early-access 已可得）**。两颗芯片分别记录——
+  - **鲲鹏 920（现役部署）= ARMv8.2-A，NEON-only，无 SVE/SVE2/SME（✅ 多源确认：IEEE Micro 2021 + VLDB Journal 2022 + Stony Brook Ookami）**。此条与先前实现期决议一致，不变。
+  - **新一代鲲鹏（团队 early-access / 内部可得）= full SVE + SVE2 + SME（⚠️ 团队已可得；具体型号与公开可引用来源暂缺）**。此条**推翻**先前"NEON-now + SVE/SME-roadmap（鲲鹏 930+/950+ 解锁，公开未确认）"的旧口径：SVE/SME 不再是"等未来平台解锁"，而是"武器已齐备，从今天起即可在本团队自有 SVE/SME 硅上实测验证"。他平台 SVE/SME 数字（A64FX/Graviton/LX2/Apple M4 等）仍需在本团队硅上 re-measure 后引用。详见 `docs/superpowers/research/2026-06-09-platform-sme-sve.md`。
+  - **再决议驱动因素**：2026-06-10，团队 early-access 硬件到位（⚠️ 新一代鲲鹏无公开来源）。不发明芯片 SKU（不写"930/940/950"为确认型号），统一用"新一代鲲鹏"。
 - **R2**：SME 小批量 agent kernel 的公开实测数据可能稀缺（学术多关注训练大 batch GEMM）。**缓解**：若无权威实测，标注为数量级估算 + 团队可自测的 micro-benchmark 方案。
 - **R3**：A2A 协议（Google, 2025）较新，生态数据可能不稳。**缓解**：作为"趋势信号"而非精确基准引用。
 - **R4**：均衡 21 页可能仍偏紧（P3 有 7 页但要承载武器+三件事+两侧+punchline+roadmap）。**缓解**：P3-2/P3-7 可压成"封面信息密度高"的页；必要时启用附录承接细节。

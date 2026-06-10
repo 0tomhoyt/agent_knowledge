@@ -10,11 +10,11 @@
 
 ### 【第1页】开场：主线一句话 + 议程
 
-- **主线一句话**：Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台——**现役 NEON 已能融合，SVE/SME（鲲鹏 930+/950+ 解锁）是同一融合方向的下一站**——它不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合，就是我们在 Agent 时代的主场。**
+- **主线一句话**：Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台——**NEON（鲲鹏 920 现役）+ SVE/SVE2/SME（新一代鲲鹏 early-access 现已可得）是同一融合方向——武器已齐备，团队可从今天起在自有 SVE/SME 硅上实测验证，无需再等未来平台**——它不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合，就是我们在 Agent 时代的主场。**
 - **三部分议程**：
   - 第一部分（基础）：Agent 执行流程 = 计算↔通信的反复交织（8min）
   - 第二部分（洞察）：从单 Agent 到多 Agent，通信随规模上升、渐成主导（10min）
-  - 第三部分（融合）：ARM 平台（NEON 现役 + SVE/SME 前瞻）的通信计算融合 = 主场机会（9min）
+  - 第三部分（融合）：ARM 平台（NEON 现役 + SVE/SME 新一代鲲鹏 early-access）的通信计算融合 = 主场机会（9min）
 
 > 来源: 新写；抛出 thesis
 
@@ -157,7 +157,7 @@
 
 ### 【第13页】桥到 P3：通信变贵了，谁来付？
 
-- **只抛问题、不回答**："如果通信是上升中的主导成本，而我们 ARM 平台（现役 NEON + 前瞻 SVE/SME）能把通信和计算放进同一组 SIMD 单元……"
+- **只抛问题、不回答**："如果通信是上升中的主导成本，而我们 ARM 平台（现役 NEON + 新一代鲲鹏 early-access SVE/SME）能把通信和计算放进同一组 SIMD 单元……"
 - **制造张力**：传统架构——通信的数据搬运/序列化与计算的向量化/矩阵化是**两套单元、两次拷贝**；融合架构——**同一组单元、同一份布局**
 - **期待制造**：在 ARM 平台上，"通信计算融合"不只是潜在机会，而是有论证的**主场答案**
 
@@ -172,8 +172,8 @@
 
 ### 【第14页】章节封面 + 主场一句话
 
-- **承接 P2-7 问题**："通信变贵了，谁来付？——在我们 ARM 平台上，NEON（现役）+ SVE/SME（前瞻）是通信计算融合的物理基础。"
-- **主场一句话**：**现役 NEON 已能做基础融合（向量化序列化/pack/基础 SIMD）；SVE 的 predicate+gather/scatter 与 SME 的矩阵引擎是"下一站"——它们共享同一融合主线**
+- **承接 P2-7 问题**："通信变贵了，谁来付？——在我们 ARM 平台上，NEON（鲲鹏 920 现役）+ SVE/SME（新一代鲲鹏 early-access）是通信计算融合的物理基础。"
+- **主场一句话**：**现役 NEON 已能做基础融合（向量化序列化/pack/基础 SIMD）；SVE 的 predicate+gather/scatter 与 SME 的矩阵引擎（新一代鲲鹏 early-access 现已可得，⚠️ 暂无公开来源）是同一融合主线上的增量武器——团队可从今天起在自有 SVE/SME 硅上实测验证**
 - **本章叙事弧**：武器（NEON/SVE/SME 是什么）→ 融合论点（三件事）→ 算子侧 → 通信侧 → 融合 punchline → 路线图
 
 > 主线触点: handoff 落地
@@ -181,26 +181,26 @@
 
 ---
 
-### 【第15页】NEON（现役）/ SVE（前瞻）/ SME（前瞻）——ARM 的三类向量/矩阵武器，为什么对 Agent 特别
+### 【第15页】NEON（鲲鹏 920 现役）/ SVE（新一代鲲鹏 early-access）/ SME（新一代鲲鹏 early-access）——ARM 的三类向量/矩阵武器，为什么对 Agent 特别
 
 - **NEON（现役·鲲鹏 920 现在就有）**：固定 128-bit SIMD（16×8-bit / 8×16-bit / 4×32-bit / 2×64-bit lane），整向量操作、无 per-lane 谓词、无原生 gather/scatter
-- **SVE（前瞻·鲲鹏 930+/950+ 解锁）**：向量长度可扩展（128-2048 bit）、**Predicate 寄存器**（逐 lane 谓词）、**原生 gather-load/scatter-store**（向量化非连续访问）
-- **SME（前瞻·鲲鹏 930+/950+ 解锁）**：**ZA tile 寄存器**（VL×VL 的 2D 数组）、**Outer-product 引擎**（C += A⊗B，外积之和 = 矩阵乘）
+- **SVE（新一代鲲鹏 early-access 已可得，⚠️ 暂无公开来源）**：向量长度可扩展（128-2048 bit）、**Predicate 寄存器**（逐 lane 谓词）、**原生 gather-load/scatter-store**（向量化非连续访问）；具体特性数字仍为他平台（A64FX / Graviton / LX2 等）实测，需在本团队 SVE 硅上 re-measure 后引用
+- **SME（新一代鲲鹏 early-access 已可得，⚠️ 暂无公开来源）**：**ZA tile 寄存器**（VL×VL 的 2D 数组）、**Outer-product 引擎**（C += A⊗B，外积之和 = 矩阵乘）；具体特性数字仍为他平台（Apple M4 等）实测，需在本团队 SME 硅上 re-measure 后引用
 - **为什么对 Agent 特别**：Agent 负载是"变长/不规则/小批量"的——predicate 处理变长、gather/scatter 处理不规则消息访问、矩阵引擎处理小批量 GEMM/embedding
 
-> 来源: ✅ 已研究（见研究文档 docs/superpowers/research/2026-06-09-platform-sme-sve.md §3）；NEON-now + SVE/SME-roadmap 口径
+> 来源: ✅ 已研究（见研究文档 docs/superpowers/research/2026-06-09-platform-sme-sve.md §3）；NEON-now（鲲鹏 920）+ SVE/SME early-access（新一代鲲鹏，⚠️ 暂无公开来源）口径
 
 ---
 
 ### 【第16页】通信计算融合 = 三件事（核心 thesis 页）
 
 - **① 重叠**：通信期间做计算（延迟隐藏）——API 等待 500ms-5s 期间，本地 CPU 利用 SIMD 做数据预处理/后处理/向量检索
-- **② 数据搬运即计算**：序列化/pack/转置/gather 本身就是向量化/矩阵化工作——NEON 现役就能做基础 SIMD 加速，SVE/SME 解锁后 predicate/gather-scatter/矩阵引擎是增量增强
+- **② 数据搬运即计算**：序列化/pack/转置/gather 本身就是向量化/矩阵化工作——NEON（鲲鹏 920 现役）就能做基础 SIMD 加速，SVE/SME（新一代鲲鹏 early-access 现已可得）的 predicate/gather-scatter/矩阵引擎是增量增强
 - **③ kernel+原语协同**：comm 原语与算子共享 SIMD 单元+内存布局，消除边界拷贝——同一组 NEON/SVE/SME 单元、同一份数据布局
-- **论点**：在现役 NEON 上**今天就能做融合**（向量化序列化/pack/基础 SIMD）；SVE 的 predicate+gather/scatter 与 SME 的矩阵引擎是"下一站"——前后是同一融合主线的现在与未来
+- **论点**：在现役 NEON 上**今天就能做融合**（向量化序列化/pack/基础 SIMD）；SVE 的 predicate+gather/scatter 与 SME 的矩阵引擎（新一代鲲鹏 early-access 现已可得，⚠️ 暂无公开来源）是同一融合主线上的增量增强——前后是同一融合主线的现在与未来
 
 > 主线触点: 🎯 thesis 展开 —— 通信计算融合的三件事
-> 来源: 综合；NEON-now + SVE/SME-roadmap 口径
+> 来源: 综合；NEON-now（鲲鹏 920）+ SVE/SME early-access（新一代鲲鹏，⚠️ 暂无公开来源）口径
 
 ---
 
@@ -208,10 +208,10 @@
 
 - **Agent 算子特征**：embedding/rerank/小批量 GEMM/attention 是"瘦高"矩阵（batch 1-8 vs 训练 32-1024）
 - **NEON（现役）机会**：128-bit 固定宽度 SIMD 做基础向量化——小批量 GEMM、embedding 聚合、attention 的向量化片段
-- **SME（前瞻）增量**：outer-product + ZA tile 天然适配"瘦高"小批量矩阵（区别于训练大 batch）；矩阵引擎让小批量也有高占满度
+- **SME（新一代鲲鹏 early-access）增量**：outer-product + ZA tile 天然适配"瘦高"小批量矩阵（区别于训练大 batch）；矩阵引擎让小批量也有高占满度
 - **映射团队能力**：GEMM/Attention 优化经验 → Agent-native 小批量 kernel 库（⚠️ 若无 SME 实测数据，标"数量级 + 可自测 micro-benchmark"）
 
-> 来源: 🆕 需研究（SME 小批量 GEMM 数据）；NEON-now（基础向量化）+ SME-roadmap（矩阵引擎增量）
+> 来源: 🆕 需研究（SME 小批量 GEMM 数据）；NEON-now（鲲鹏 920 基础向量化）+ SME early-access（新一代鲲鹏 矩阵引擎增量，⚠️ 暂无公开来源）
 
 ---
 
@@ -222,7 +222,7 @@
 - **消息搬运加速**：SVE 原生 gather/scatter 做非连续消息体搬运；SME ZA tile 做 on-the-fly pack/转置
 - **映射团队能力**：MPI/UCX/SDMA → Agent-native 通信原语（零拷贝 IPC、向量化序列化）
 
-> 来源: 承袭（simdjson 数据）+ 🆕 SVE 落地；NEON-now（simdjson 式解析）+ SVE/SME-roadmap（gather/scatter/tile 增量）
+> 来源: 承袭（simdjson 数据）+ 🆕 SVE 落地；NEON-now（鲲鹏 920 simdjson 式解析）+ SVE/SME early-access（新一代鲲鹏 gather/scatter/tile 增量，⚠️ 暂无公开来源）
 
 ---
 
@@ -231,21 +231,21 @@
 - **传统架构痛点**：comm 的"数据搬运/序列化"与 compute 的"向量化/矩阵化"是**两套单元、两次拷贝**——边界有冗余开销
 - **融合架构优势**：在 NEON/SVE/SME 上，序列化/pack/gather 本身就是 SIMD/矩阵操作——**同一组单元、同一份布局、无边界拷贝**
 - **对比图**：传统（边界拷贝/序列化开销）vs 融合（comm 数据搬运 = compute 向量化操作）
-- **收束论点**：**通信计算融合，就是我们在 Agent 时代的主场**——现役 NEON 今天就能做，SVE/SME 解锁后是同一方向的下一站
+- **收束论点**：**通信计算融合，就是我们在 Agent 时代的主场**——现役 NEON（鲲鹏 920）今天就能做，SVE/SME（新一代鲲鹏 early-access 现已可得）是同一融合方向的增量增强
 
 > 主线触点: 🎯 prescription climax，主线第三次/落地 —— 同一组单元、同一份布局
-> 来源: 综合；NEON-now + SVE/SME-roadmap 口径（去 SME 硬依赖）
+> 来源: 综合；NEON-now（鲲鹏 920）+ SVE/SME early-access（新一代鲲鹏，⚠️ 暂无公开来源）口径（去 SME 硬依赖）
 
 ---
 
 ### 【第20页】怎么开始：三层机会 + 路线图
 
-- **短期（现在-6 个月，NEON 现役）**：SIMD JSON/Protobuf 算子（simdjson 式）、零拷贝 IPC 原型、基础向量化 pack/转置——**现役鲲鹏 920 立即可做**
-- **中期（6-18 个月，SVE/SME 解锁）**：SVE predicate+gather/scatter 版序列化、SME 小批量 Agent kernel 库（embedding/rerank/小批量 GEMM）、Agent-native 通信原语标准化
+- **短期（现在-6 个月）**：NEON（鲲鹏 920 现役部署）立即可做——SIMD JSON/Protobuf 算子（simdjson 式）、零拷贝 IPC 原型、基础向量化 pack/转置；同时 SVE/SME（新一代鲲鹏 early-access）实测启动——simdjson 解析、iceoryx2 零拷贝、小-GEMM kernel、SVE gather/scatter 序列化、SME outer-product micro-bench（⚠️ 暂无公开来源）
+- **中期（6-18 个月，SVE/SME 生产化/库化）**：SVE predicate+gather/scatter 版序列化、SME 小批量 Agent kernel 库（embedding/rerank/小批量 GEMM）、Agent-native 通信原语标准化
 - **长期（18-36 个月）**：Agent Workload Benchmark + CPU-Agent 协同设计反哺架构（向 ARM 反馈 Agent-native 特性需求）
 - **能力映射**：GEMM/Attention → 小批量 kernel；MPI/UCX/SDMA → 通信原语；性能方法论 → Benchmark
 
-> 来源: 承袭 roadmap；NEON-now（短期全部可做）+ SVE/SME-roadmap（中长期）
+> 来源: 承袭 roadmap；NEON-now（鲲鹏 920 短期全部可做）+ SVE/SME early-access（新一代鲲鹏 中长期，⚠️ 暂无公开来源）
 
 ---
 
@@ -255,8 +255,8 @@
 
 ### 【第21页】总结 + 讨论问题
 
-- **thesis 回扣**：Agent loop 本质是 compute↔comm 交织（P1）→ 从单到多 Agent，通信成主导（P2）→ 在 ARM 平台（NEON 现役 + SVE/SME 前瞻）把 comm 与 compute 融合 = 主场（P3）
-- **核心收束**：通信计算融合，就是我们在 Agent 时代的主场——现役 NEON 今天就能做，SVE/SME 解锁后是同一融合方向的下一站
+- **thesis 回扣**：Agent loop 本质是 compute↔comm 交织（P1）→ 从单到多 Agent，通信成主导（P2）→ 在 ARM 平台（NEON 现役 + SVE/SME 新一代鲲鹏 early-access）把 comm 与 compute 融合 = 主场（P3）
+- **核心收束**：通信计算融合，就是我们在 Agent 时代的主场——现役 NEON（鲲鹏 920）今天就能做，SVE/SME（新一代鲲鹏 early-access 现已可得）是同一融合方向的增量增强
 - **留给团队的讨论问题**：
   1. **通信侧**：Agent 专用通信库接口应该长什么样？—— 是复用 MPI/UCX 原语还是全新设计？（映射团队 MPI/UCX/SDMA 能力）
   2. **算子侧**：Agent 算子和训练/推理算子的边界在哪里？—— 哪些可以复用 GEMM/Attention 经验，哪些必须打破重来？（映射团队 GEMM/Attention 能力）
@@ -294,15 +294,15 @@
 
 ---
 
-### 【附录3】ARM 平台特性表（鲲鹏 920 / 930 → NEON / SVE / SME）
+### 【附录3】ARM 平台特性表（鲲鹏 920 / 新一代鲲鹏 → NEON / SVE / SVE2 / SME）
 
 | 平台 / 微架构 | ISA 基线 | NEON（128-bit SIMD） | SVE 向量宽度 | SVE2 | FEAT_SME / SME2 |
 |---|---|---|---|---|---|
 | **鲲鹏 920 / TaiShan v110** | ARMv8.2-A | **有**（NEON-basic，128-bit 固定宽度）✅ | **无** ❌ | **无** ❌ | **无** ❌ |
-| **鲲鹏 930** | **公开未确认** | 假定有（NEON 是 ARMv8/v9 基线）⚠️ | **公开未确认** ⚠️ | **公开未确认** ⚠️ | **公开未确认** ⚠️ |
-| **鲲鹏 950/960 路线图** | 计划上市 2026 Q4 / 2028 Q1 | — | — | — | — |
+| **新一代鲲鹏（团队 early-access / 内部可得）** | full SVE + SVE2 + SME | **有**（NEON 是 ARMv9 基线）⚠️ | **可得** ⚠️ | **可得** ⚠️ | **可得** ⚠️ |
+| ~~鲲鹏 930 / 950 / 960~~ | — | — | — | — | — |
 
-> 来源: docs/superpowers/research/2026-06-09-platform-sme-sve.md；口径: 920=NEON-only ✅, 930 SVE/SME 公开未确认 ⚠️
+> 来源: docs/superpowers/research/2026-06-09-platform-sme-sve.md；口径: 鲲鹏 920 = NEON-only ✅（IEEE Micro 2021 + VLDB Journal 2022 + Stony Brook Ookami，多源确认，不变）；新一代鲲鹏（early-access）= full SVE + SVE2 + SME ⚠️ 团队已可得，具体型号与公开可引用来源暂缺——不在 920 上，他平台数字（A64FX/Graviton/LX2/Apple M4）需在本团队硅 re-measure 后引用
 
 ---
 
