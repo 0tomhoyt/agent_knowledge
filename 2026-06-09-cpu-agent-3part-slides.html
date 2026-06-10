@@ -22,7 +22,7 @@
 <li>Agent 不是&quot;更大的模型&quot;，而是<strong>带工具的长循环</strong>：几十到上百次&quot;LLM 推理 + 工具调用&quot;往返</li>
 <li>工具执行（编译/测试/IO）吃掉 <strong>35%-61%</strong> 请求时间，编码任务高达 <strong>60%</strong> [来源: PASTE, arXiv 2603.18897] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
 <li>单→多 Agent 转折：通信占比随规模上升，渐成主导成本</li>
-<li>多 Agent 比 Agent ~<strong>2-5×</strong> token/成本（<img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> 数量级估算，受任务/AI 数量/轮数影响）[来源: 承袭旧详细文档 P2-3]</li>
+<li>多 Agent 比 Agent ~<strong>2-5×</strong> token/成本（<img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> 数量级估算，受任务/AI 数量/轮数影响）[来源: 团队早期版本]</li>
 <li>ARM 主场：NEON（鲲鹏 920 现役）+ SVE/SVE2/SME（新一代鲲鹏 early-access 现已可得）是同一融合方向——武器已齐备，团队可从今天起在自有 SVE/SME 硅上实测验证，无需再等未来平台</li>
 </ul>
 <footer>2026-06 · 三部分重构版</footer>
@@ -256,11 +256,11 @@
 <li><strong>分布式共识延迟墙</strong>（<img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> 数量级估算，随拓扑/存储介质）：
 <ul>
 <li>etcd (Raft) LAN 单次提交约 <strong>1-10ms</strong>（fdatasync：HDD ~10ms、SSD &lt;1ms）[来源: etcd 官方, 2017] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
-<li>Raft/Paxos 10 节点典型延迟 <strong>10-50ms</strong> 量级 [来源: 承袭旧详细文档 P2-5] <img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/></li>
+<li>Raft/Paxos 10 节点典型延迟 <strong>10-50ms</strong> 量级 [来源: 团队早期版本] <img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/></li>
 </ul>
 </li>
 <li><strong>负载不均（木桶效应）</strong>：编译 agent CPU 100% vs 产品 agent 10% → 端到端被编译 agent 决定；MetaGPT 1 agent $0.915 → 4 agents $1.385 [来源: MetaGPT ICLR 2024 Table 3] <img class="emoji" draggable="false" alt="✅" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/2705.svg" data-marp-twemoji=""/></li>
-<li><strong>推荐方向</strong>：最终一致性 + 无状态消息传递延迟仅 <strong>1-5μs</strong>（<img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> 数量级估算）[来源: 承袭旧详细文档 P2-5] <img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/></li>
+<li><strong>推荐方向</strong>：最终一致性 + 无状态消息传递延迟仅 <strong>1-5μs</strong>（<img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/> 数量级估算）[来源: 团队早期版本] <img class="emoji" draggable="false" alt="⚠️" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.2/assets/svg/26a0.svg" data-marp-twemoji=""/></li>
 </ul>
 <footer>2026-06 · 三部分重构版</footer>
 </section>

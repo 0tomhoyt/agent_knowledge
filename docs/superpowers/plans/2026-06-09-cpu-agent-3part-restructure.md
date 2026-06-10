@@ -11,8 +11,8 @@
 **Driving spec:** `docs/superpowers/specs/2026-06-09-cpu-agent-3part-restructure-design.md` (read it first — every page table below is defined there).
 
 **Carry-over sources (read-only):**
-- `2026-06-09-cpu-agent-era-direction-ppt-detailed.md` — primary verified-data source (SWE-bench, SWE-agent, simdjson, JSON/Protobuf/FlatBuffers, 锁竞争 10-100×, 共识延迟, latency/speedup appendices, 数据校验报告)
-- `2026-06-09-cpu-agent-era-direction-ppt-outline.md`, `docs/superpowers/specs/2026-06-09-cpu-agent-era-direction-design.md` — secondary
+- `2026-06-09-cpu-agent-era-direction-ppt-detailed.md` —（**已于 2026-06-10 合并移除**，已验证数据全部并入 `…-3part-ppt-detailed.md`；git 历史可恢复）原 primary verified-data source (SWE-bench, SWE-agent, simdjson, JSON/Protobuf/FlatBuffers, 锁竞争 10-100×, 共识延迟, latency/speedup appendices, 数据校验报告)
+- `2026-06-09-cpu-agent-era-direction-ppt-outline.md`, `docs/superpowers/specs/2026-06-09-cpu-agent-era-direction-design.md` — secondary（**同样已于 2026-06-10 合并移除**）
 
 **Unified spine (must appear and stay consistent across all tasks):**
 > Agent 运行时 = 计算↔通信反复交织的长循环；通信占比随规模上升、渐成主导；ARM SME/SVE 是通信计算融合的物理基础 = 我们的主场。Spine 触点页：P1-4（第一次点题）、P2-6/P2-7（diagnosis + handoff）、P3-3/P3-6（thesis 展开 + prescription climax）。
