@@ -22,13 +22,13 @@
 
 并在三个关键约束下重构：
 
-- **硬件**：团队主力平台为 **ARM 服务器 CPU**（倚天/鲲鹏/飞腾/Graviton 类），**SME/SVE 是已有或正在跟进的能力**。因此第三部分是"深化、落地我们正在做的事"，而非前瞻论证一个新方向。
+- **硬件**：团队主力平台为 **华为鲲鹏 920（TaiShan v110, ARMv8.2-A；现役仅 NEON 128-bit，无 SVE/SVE2/SME）**；SVE/SVE2/SME 为**前瞻/路线图**（鲲鹏 930+/950+ 解锁，公开未确认）。**R1 已决议口径 = NEON-now + SVE/SME-roadmap**（见 §11、`docs/superpowers/research/2026-06-09-platform-sme-sve.md`）。第三部分因此是"在现役 NEON 上今天就能做的融合 + SVE/SME 前瞻解锁"。
 - **P2 定位**："洞察报告" = **两者结合**——先快速盘点业界/学术现状（建立共同认知），再落到团队提炼的关键洞察与瓶颈，桥到第三部分。
 - **时间**：**均衡分配**，约 P1 8min / P2 10min / P3 9min + 开场 1min + 总结 2min = 30min。
 
 ### 1.2 统一主线（全场一句话 spine）
 
-> **Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。** 从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台拥有 **SME（矩阵）+ SVE（向量）**——它们不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合**，就是我们在 Agent 时代的主场。
+> **Agent 运行时 = 一段不断在「计算」与「通信」之间来回切换的长循环。** 从单 Agent 的"工具调用往返"，到多 Agent 的"A2A 协作"，**通信占比随规模上升、逐渐压过计算成为主导成本**。而我们的 ARM 平台——**现役 NEON 已能融合，SVE/SVE2/SME（鲲鹏 930+/950+ 解锁）是同一融合方向的下一站**——它不只是算子加速器，更是能把"通信的数据搬运/序列化"与"计算的向量化/矩阵化"放进**同一组执行单元**的融合点。**通信计算融合**，就是我们在 Agent 时代的主场。
 
 三部分构成 **problem setup → diagnosis → prescription** 的诊断弧：
 
@@ -36,7 +36,7 @@
 |------|----------------|
 | **P1 基础** | **problem setup** — 让听众从第 1 页就看到 agent loop 本质是 compute↔comm 交织（非"什么是大模型"那种浅基础） |
 | **P2 洞察** | **diagnosis** — 现状盘点 + 数据论证："单→多 Agent，通信占比上升、渐成主导" |
-| **P3 融合** | **prescription** — 在 ARM 平台用 SME/SVE 把 comm 与 compute 融合 = 主场机会 |
+| **P3 融合** | **prescription** — 在 ARM 平台（NEON 现役 + SVE/SME 前瞻）把 comm 与 compute 融合 = 主场机会 |
 
 主线把作者最初对 P3 的措辞"潜在机会"升级为"有论证的主张"——机会不是清单，而是诊断弧的自然结论。
 
@@ -101,12 +101,14 @@
 
 ## 5. Part 3 融合 —— ARM SME/SVE 通信计算融合（7 页, 9min, prescription）
 
-**角色**：主线的 **prescription**。承接 P2-7 抛出的问题，给出主场答案：**ARM 平台的 SME（矩阵）+ SVE（向量）是"通信计算融合"的物理基础**。叙事弧：**武器（SME/SVE 是什么）→ 融合论点（三件事）→ 算子侧 → 通信侧 → 融合 punchline → 路线图**。
+**角色**：主线的 **prescription**。承接 P2-7 抛出的问题，给出主场答案：**ARM 平台的 SIMD/向量/矩阵扩展（现役 NEON + 前瞻 SVE/SME）是"通信计算融合"的物理基础**（R1 已决议口径 = NEON-now + SVE/SME-roadmap）。叙事弧：**武器（NEON/SVE/SME 是什么）→ 融合论点（三件事）→ 算子侧 → 通信侧 → 融合 punchline → 路线图**。
+
+> **⚠️ P3 各页口径**：现役平台鲲鹏 920 仅 NEON，SVE/SME 为路线图。下表 P3-2~P3-7 措辞仍保留旧"SME/SVE"字样，**实现时以 `docs/superpowers/research/2026-06-09-platform-sme-sve.md` §4 传导表为准**调整为 NEON-now 口径（NEON=现役，SVE/SME=前瞻/路线图）。
 
 | 页 | 标题 | 要点 | 主线触点 | 来源 |
 |----|------|------|----------|------|
-| P3-1 | 章节封面 + 主场一句话 | 承接 P2-7，一句话："在我们 ARM 平台上，SME+SVE 是通信计算融合的物理基础。" | handoff 落地 | 新写 |
-| P3-2 | SME/SVE 是什么、为什么对 agent 特别 | SVE（向量·predicate·gather/scatter·向量长度可扩展）+ SME（2D tile·outer-product 矩阵引擎）；论点：**可扩展宽度+predicate+gather/scatter** 匹配 agent 的"变长/不规则/小批量"，vs x86 AVX-512 固定宽度 | 武器亮相 | **🆕 需研究**（spec + **平台型号/是否有 SME**） |
+| P3-1 | 章节封面 + 主场一句话 | 承接 P2-7，一句话："在我们 ARM 平台上，NEON（现役）+ SVE/SME（前瞻）是通信计算融合的物理基础。" | handoff 落地 | 新写 |
+| P3-2 | NEON/SVE/SME 是什么、为什么对 agent 特别 | **NEON（现役·固定 128-bit SIMD）+ SVE（前瞻·predicate+gather/scatter+向量长度可扩展）+ SME（前瞻·2D tile+outer-product 矩阵引擎）**；论点：predicate+gather/scatter+矩阵引擎 匹配 agent 的"变长/不规则/小批量"，vs x86 AVX-512 固定宽度；NEON 今天就能做基础融合 | 武器亮相 | ✅ 已研究（见研究文档 §3） |
 | **P3-3** | **通信计算融合 = 三件事**（核心 thesis 页） | ①**重叠**：comm 期间做计算（延迟隐藏）②**数据搬运即计算**：SME/SVE 加速序列化/pack/转置/gather——comm 的数据搬运本身就是向量化/矩阵化工作 ③**kernel+原语协同**：comm 原语与算子共享 SME/SVE 单元+内存布局，消除边界拷贝 | **🎯 thesis 展开** | 综合 |
 | P3-4 | 算子侧：小批量 agent kernel on SME | agent 的 embedding/rerank/小批量 GEMM/attention 是"瘦高"矩阵，SME outer-product+tile 适合；vs 训练推理大 batch GEMM。映射团队 **GEMM/Attention** 能力 | compute 侧机会 | **🆕 需研究**（SME 小批量 GEMM 数据） |
 | P3-5 | 通信侧：SVE 加速 comm 数据通路 | SVE 版 simdjson 式 JSON/序列化（承袭 simdjson 数据，落到 SVE/NEON）；共享内存零拷贝+SVE gather/scatter 搬运不规则消息；pack/transpose 用 SME tile。映射团队 **MPI/UCX/SDMA** 能力 | comm 侧机会 | 承袭 + **🆕 SVE 落地** |
